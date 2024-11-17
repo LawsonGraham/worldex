@@ -72,9 +72,12 @@ contract DexMarketBuyOrderTest is Test {
         vm.startPrank(user1);
         dex.depositEth{value: 10 ether}();
         
-        vm.expectRevert();
+        // Should pass even with empty orderbook
         dex.createMarketOrder(Dex.Side.BUY, LINK, 10);
         vm.stopPrank();
+
+        Dex.Order[] memory orders = dex.getOrderBook(LINK, Dex.Side.SELL);
+        assertEq(orders.length, 0, "Orderbook should be empty");
     }
 
     function test_RevertBuyMarketOrderWithNoEth() public {

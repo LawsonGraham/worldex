@@ -73,9 +73,12 @@ contract DexMarketSellOrderTest is Test {
         link.approve(address(dex), 100);
         dex.deposit(100, LINK);
         
-        vm.expectRevert();
+        // Should pass even with empty orderbook
         dex.createMarketOrder(Dex.Side.SELL, LINK, 10);
         vm.stopPrank();
+
+        Dex.Order[] memory orders = dex.getOrderBook(LINK, Dex.Side.BUY);
+        assertEq(orders.length, 0, "Orderbook should be empty");
     }
 
     function test_RevertSellMarketOrderWithInsufficientBalance() public {

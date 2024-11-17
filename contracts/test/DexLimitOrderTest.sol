@@ -64,10 +64,10 @@ contract DexLimitOrderTest is Test {
 
         // Create buy limit order
         dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 1 ether);
-        vm.stopPrank();
 
         uint finalEthBalance = dex.balances(user1, ETH);
         uint finalReservedBalance = dex.getReservedEthBalance();
+        vm.stopPrank();
 
         assertEq(finalEthBalance, initialEthBalance - 10 ether, "ETH balance not decreased correctly");
         assertEq(finalReservedBalance, initialReservedBalance + 10 ether, "Reserved balance not increased correctly");
@@ -87,10 +87,10 @@ contract DexLimitOrderTest is Test {
 
         // Create sell limit order
         dex.createLimitOrder(Dex.Side.SELL, LINK, 50, 1 ether);
-        vm.stopPrank();
 
         uint finalTokenBalance = dex.balances(user1, LINK);
         uint finalReservedBalance = dex.getReservedTokenBalance(LINK);
+        vm.stopPrank();
 
         assertEq(finalTokenBalance, initialTokenBalance - 50, "Token balance not decreased correctly");
         assertEq(finalReservedBalance, initialReservedBalance + 50, "Reserved balance not increased correctly");
@@ -115,7 +115,7 @@ contract DexLimitOrderTest is Test {
     function test_BuyOrderbookSortedByAscendingPrices() public {
         // Setup multiple buy orders at different prices
         vm.startPrank(user1);
-        dex.depositEth{value: 50 ether}();
+        dex.depositEth{value: 60 ether}(); // Deposit enough for all orders
 
         dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 2 ether);
         dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 1 ether);

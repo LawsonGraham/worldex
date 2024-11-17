@@ -1,13 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../node_modules/@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import "openzeppelin-contracts/contracts/access/Ownable.sol";
 
 contract Wallet is Ownable {
-
-    using SafeMath for uint256;
 
     struct Token {
         bytes32 ticker;
@@ -24,6 +21,8 @@ contract Wallet is Ownable {
         require(tokenMapping[ticker].tokenAddress != address(0), "Token does not exist");
         _;
     }
+
+    constructor(address owner) Ownable(owner) {}
 
     function addToken(bytes32 ticker, address tokenAddress) onlyOwner external {
         require(tokenMapping[ticker].tokenAddress == address(0), "Token already exists");
@@ -56,25 +55,25 @@ contract Wallet is Ownable {
         require(IERC20(tokenMapping[ticker].tokenAddress).allowance(msg.sender, address(this)) >= amount, "Insufficient allowance");
 
          IERC20(tokenMapping[ticker].tokenAddress).transferFrom(msg.sender, address(this), amount);
-         balances[msg.sender][ticker] = balances[msg.sender][ticker].add(amount);
+         balances[msg.sender][ticker] = balances[msg.sender][ticker] + amount;
     }
 
     function withdraw(uint256 amount, bytes32 ticker) tokenExists(ticker) external {
         require(balances[msg.sender][ticker] >= amount, "Insufficient token balance");
 
-        balances[msg.sender][ticker] = balances[msg.sender][ticker].sub(amount);
+        balances[msg.sender][ticker] = balances[msg.sender][ticker] - amount;
         IERC20(tokenMapping[ticker].tokenAddress).transfer(msg.sender, amount);
     }
 
     function depositEth() public payable returns (uint256) {
-        balances[msg.sender][bytes32("ETH")] = balances[msg.sender][bytes32("ETH")].add(msg.value);
+        balances[msg.sender][bytes32("ETH")] = balances[msg.sender][bytes32("ETH")] + msg.value;
 
         return balances[msg.sender][bytes32("ETH")];
     }
 
     function withdrawEth(uint256 amount) external {
         require(balances[msg.sender][bytes32("ETH")] >= amount, "Insufficient ETH balance");
-        balances[msg.sender][bytes32("ETH")] = balances[msg.sender][bytes32("ETH")].sub(amount);
+        balances[msg.sender][bytes32("ETH")] = balances[msg.sender][bytes32("ETH")] - amount;
         payable(msg.sender).transfer(amount);
     }
 

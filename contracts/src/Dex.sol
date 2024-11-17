@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.13;
 pragma abicoder v2;
 
 import "./Wallet.sol";
-import "../node_modules/@openzeppelin/contracts/utils/math/Math.sol";
+import "openzeppelin-contracts/contracts/utils/math/Math.sol";
 
 contract Dex is Wallet {
 
-    using SafeMath for uint256;
     using Math for uint256;
 
     enum Side { BUY, SELL }
@@ -32,6 +31,7 @@ contract Dex is Wallet {
     address[] public tradersArray; // the addresses of every trader that submitted orders 
     uint256 public nextCounterId = 0;
 
+    constructor(address owner) Wallet(owner) {}
 
     function getOrderBook(bytes32 ticker, Side side) view external returns (Order[] memory) {
         return orderBook[ticker][side];
@@ -55,11 +55,11 @@ contract Dex is Wallet {
         if (side == Side.BUY) {
             bytes32 eth = bytes32("ETH");
             uint256 ethBalance = balances[msg.sender][eth];
-            uint256 orderCost = amount.mul(price);
+            uint256 orderCost = amount * price;
             require( ethBalance >= orderCost, "Insufficient ETH balance");
 
-            balances[msg.sender][eth] = balances[msg.sender][eth].sub(orderCost);
-            reservedBalances[msg.sender][eth] = reservedBalances[msg.sender][eth].add(orderCost);
+            balances[msg.sender][eth] = balances[msg.sender][eth] - orderCost;
+            reservedBalances[msg.sender][eth] = reservedBalances[msg.sender][eth] + orderCost;
         }
 
         // reserve tokens to execute limit SELL order
@@ -67,8 +67,8 @@ contract Dex is Wallet {
             uint256 tokenBalance = balances[msg.sender][ticker];
             require( tokenBalance >= amount, "Insufficient token balance");
 
-            balances[msg.sender][ticker] = balances[msg.sender][ticker].sub(amount);
-            reservedBalances[msg.sender][ticker] = reservedBalances[msg.sender][ticker].add(amount);
+            balances[msg.sender][ticker] = balances[msg.sender][ticker] - amount;
+            reservedBalances[msg.sender][ticker] = reservedBalances[msg.sender][ticker] + amount;
         }
 
         // create limit order
@@ -174,30 +174,30 @@ contract Dex is Wallet {
             // 1. the amount still available to be filled in this limit order (orderAvailableAmount)
             // 2. the remaining part of the market order yet to be filled (remainingAmountToFill)
             uint256 orderAvailableAmount = order.amount - order.amountFilled;
-            uint256 remainingAmountToFill = marketOrderAmount.sub(amountFilled);
+            uint256 remainingAmountToFill = marketOrderAmount - amountFilled;
             uint256 remainingAmountFillable = Math.min(orderAvailableAmount, remainingAmountToFill);
 
             // increment the amountFilled of this buy order by `remainingAmountFillable` (e.g the additional amount filled in the limit order) 
-            order.amountFilled = order.amountFilled.add(remainingAmountFillable);
+            order.amountFilled = order.amountFilled + remainingAmountFillable;
             require(order.amountFilled <= order.amount, "Amount filled exceeds limit order amount");
 
-            uint256 remainingAmountFillableEthCost = remainingAmountFillable.mul(order.price);
+            uint256 remainingAmountFillableEthCost = remainingAmountFillable * order.price;
             (address buyerAddress, address sellerAddress) = (side == Side.BUY)? (order.trader, msg.sender) : (msg.sender, order.trader);
 
             // execute the trade 
             // 1. decrease buyer ETH balance
             mapping (address => mapping(bytes32 => uint256)) storage buyerBalances = (side == Side.BUY) ? reservedBalances: balances;
-            buyerBalances[buyerAddress][bytes32("ETH")] = buyerBalances[buyerAddress][bytes32("ETH")].sub(remainingAmountFillableEthCost);
+            buyerBalances[buyerAddress][bytes32("ETH")] = buyerBalances[buyerAddress][bytes32("ETH")] - remainingAmountFillableEthCost;
             // 2. decrease seller tokens
             mapping (address => mapping(bytes32 => uint256)) storage sellerBalances = (side == Side.BUY) ? balances: reservedBalances;
-            sellerBalances[sellerAddress][order.ticker] = sellerBalances[sellerAddress][order.ticker].sub(remainingAmountFillable);
+            sellerBalances[sellerAddress][order.ticker] = sellerBalances[sellerAddress][order.ticker] - remainingAmountFillable;
             // 3. increase buyer tokens
-            balances[buyerAddress][order.ticker] = balances[buyerAddress][order.ticker].add(remainingAmountFillable);
+            balances[buyerAddress][order.ticker] = balances[buyerAddress][order.ticker] + remainingAmountFillable;
             // 4. increase seller ETH balance
-            balances[sellerAddress][bytes32("ETH")] = balances[sellerAddress][bytes32("ETH")].add(remainingAmountFillableEthCost);
+            balances[sellerAddress][bytes32("ETH")] = balances[sellerAddress][bytes32("ETH")] + remainingAmountFillableEthCost;
 
             // increment the amountFilled of the buy order with the amount filled in tihs sell order
-            amountFilled = amountFilled.add(remainingAmountFillable);
+            amountFilled = amountFilled + remainingAmountFillable;
         }
 
         // remove filled orders from orderbook and move them to order history

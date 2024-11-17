@@ -5,7 +5,7 @@ pragma abicoder v2;
 import "./Wallet.sol";
 import "openzeppelin-contracts/contracts/utils/math/Math.sol";
 
-contract Dex is Wallet {
+contract Dex is Wallet, Graylist{
 
     using Math for uint256;
 
@@ -31,7 +31,7 @@ contract Dex is Wallet {
     address[] public tradersArray; // the addresses of every trader that submitted orders 
     uint256 public nextCounterId = 0;
 
-    constructor(address owner) Wallet(owner) {}
+    constructor(address owner, IWorldID _worldId, string memory _appId, string memory _actionId) Wallet(owner) Graylist(_worldId, _appId,  _actionId) {}
 
     function getOrderBook(bytes32 ticker, Side side) view external returns (Order[] memory) {
         return orderBook[ticker][side];
@@ -50,6 +50,9 @@ contract Dex is Wallet {
     }
 
     function createLimitOrder(Side side, bytes32 ticker, uint256 amount, uint256 price) public returns (uint256) {
+	//verify user is whitelisted
+        require(verifiedTradersAddresses[msg.sender], "User is not verified");
+
 
         // reserve eth to execute limit BUY order
         if (side == Side.BUY) {
@@ -99,7 +102,7 @@ contract Dex is Wallet {
 
 
     function createMarketOrder(Side side, bytes32 ticker, uint256 amount) public returns (uint256) {
-
+        require(verifiedTradersAddresses[msg.sender], "User is not verified");
         if (side == Side.BUY) {
             uint256 ethBalance = balances[msg.sender][bytes32("ETH")];
             require( ethBalance > 0, "Insufficient ETH balance");

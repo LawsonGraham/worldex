@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "env": {
+    "NEXTAUTH_SECRET": "@nextauth_secret",
+    "WLD_CLIENT_ID": "@wld_client_id",
+    "WLD_CLIENT_SECRET": "@wld_client_secret",
+    "NEXT_PUBLIC_APP_ID": "@next_public_app_id",
+    "NEXT_PUBLIC_ACTION": "@next_public_action",
+    "NEXT_PUBLIC_WALLETCONNECT_ID": "@next_public_walletconnect_id",
+    "NEXT_PUBLIC_CONTRACT_ADDRESS": "@next_public_contract_address",
+    "NEXT_PUBLIC_ALCHEMY_RPC_URL": "@next_public_alchemy_rpc_url"
+  },
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_APP_ID": "@next_public_app_id",
+      "NEXT_PUBLIC_ACTION": "@next_public_action",
+      "NEXT_PUBLIC_WALLETCONNECT_ID": "@next_public_walletconnect_id",
+      "NEXT_PUBLIC_CONTRACT_ADDRESS": "@next_public_contract_address",
+      "NEXT_PUBLIC_ALCHEMY_RPC_URL": "@next_public_alchemy_rpc_url"
+    }
+  }
+}

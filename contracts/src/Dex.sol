@@ -12,6 +12,13 @@ contract Dex is Wallet, Graylist {
     enum Side { BUY, SELL }
     enum OrderType { LIMIT, MARKET }
 
+    // Cooldown period in seconds (10 seconds for testing)
+    uint256 private constant TRADE_COOLDOWN = 10;
+    // Maximum trades per day
+    uint256 private constant MAX_DAILY_TRADES = 10;
+    // Seconds in a day
+    uint256 private constant SECONDS_PER_DAY = 86400;
+
     struct Order {
         uint256 id;
         OrderType orderType;
@@ -30,7 +37,48 @@ contract Dex is Wallet, Graylist {
     address[] public tradersArray; // the addresses of every trader that submitted orders 
     uint256 public nextCounterId = 0;
 
+    // Rate limiting mappings
+    mapping(address => uint256) private lastTradeTimestamp;
+    mapping(address => uint256) private dailyTradeCount;
+    mapping(address => uint256) private lastTradingDay;
+
     constructor(address owner, IWorldID _worldId, string memory _appId, string memory _actionId) Wallet(owner) Graylist(_worldId, _appId,  _actionId) {}
+
+    // Get the current trading day (timestamp divided by seconds per day)
+    function _getCurrentTradingDay() private view returns (uint256) {
+        return block.timestamp / SECONDS_PER_DAY;
+    }
+
+    // Reset daily trade count if it's a new day
+    function _updateDailyTradeCount(address trader) private {
+        uint256 currentDay = _getCurrentTradingDay();
+        if (currentDay > lastTradingDay[trader]) {
+            dailyTradeCount[trader] = 0;
+            lastTradingDay[trader] = currentDay;
+        }
+    }
+
+    // Modifier to enforce trade limits
+    modifier enforceTradeLimit() {
+        // Check cooldown period
+        require(
+            block.timestamp >= lastTradeTimestamp[msg.sender] + TRADE_COOLDOWN,
+            "Trade cooldown period not elapsed"
+        );
+
+        // Update and check daily trade count
+        _updateDailyTradeCount(msg.sender);
+        require(
+            dailyTradeCount[msg.sender] < MAX_DAILY_TRADES,
+            "Daily trade limit reached"
+        );
+
+        _;
+
+        // Update trade tracking
+        lastTradeTimestamp[msg.sender] = block.timestamp;
+        dailyTradeCount[msg.sender]++;
+    }
 
     function getOrderBook(bytes32 ticker, Side side) view external returns (Order[] memory) {
         return orderBook[ticker][side];
@@ -48,7 +96,32 @@ contract Dex is Wallet, Graylist {
         return reservedBalances[msg.sender][bytes32("ETH")];
     }
 
-    function createLimitOrder(Side side, bytes32 ticker, uint256 amount, uint256 price) public returns (uint256) {
+    // Get remaining cooldown time in seconds
+    function getRemainingCooldown() external view returns (uint256) {
+        uint256 lastTrade = lastTradeTimestamp[msg.sender];
+        if (lastTrade == 0) return 0;
+        
+        uint256 timeSinceLastTrade = block.timestamp - lastTrade;
+        if (timeSinceLastTrade >= TRADE_COOLDOWN) return 0;
+        
+        return TRADE_COOLDOWN - timeSinceLastTrade;
+    }
+
+    // Get remaining trades for the current day
+    function getRemainingDailyTrades() external view returns (uint256) {
+        address trader = msg.sender;
+        uint256 currentDay = _getCurrentTradingDay();
+        
+        // If it's a new day, they have all trades available
+        if (currentDay > lastTradingDay[trader]) {
+            return MAX_DAILY_TRADES;
+        }
+        
+        // Otherwise return remaining trades
+        return MAX_DAILY_TRADES - dailyTradeCount[trader];
+    }
+
+    function createLimitOrder(Side side, bytes32 ticker, uint256 amount, uint256 price) public enforceTradeLimit returns (uint256) {
         //verify user is whitelisted
         require(verifiedTradersAddresses[msg.sender], "User is not verified");
 
@@ -98,7 +171,7 @@ contract Dex is Wallet, Graylist {
         return order.id;
     }
 
-    function createMarketOrder(Side side, bytes32 ticker, uint256 amount) public returns (uint256) {
+    function createMarketOrder(Side side, bytes32 ticker, uint256 amount) public enforceTradeLimit returns (uint256) {
         require(verifiedTradersAddresses[msg.sender], "User is not verified");
         if (side == Side.BUY) {
             uint256 ethBalance = balances[msg.sender][bytes32("ETH")];

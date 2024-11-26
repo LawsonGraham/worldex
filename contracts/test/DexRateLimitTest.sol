@@ -32,7 +32,7 @@ contract DexRateLimitTest is Test {
     function setUp() public {
         owner = address(this);
         trader = makeAddr("trader");
-        vm.deal(trader, 200 ether); // Increased from 100 to 200 ETH
+        vm.deal(trader, 200 ether);
         
         // Deploy contracts
         worldId = new MockWorldID();
@@ -54,7 +54,7 @@ contract DexRateLimitTest is Test {
             [uint256(0), 0, 0, 0, 0, 0, 0, 0] // proof
         );
         // Fund trader with more ETH for multiple orders
-        dex.depositEth{value: 150 ether}(); // Increased from 50 to 150 ETH
+        dex.depositEth{value: 150 ether}();
         vm.stopPrank();
 
         // Fund trader with LINK
@@ -108,6 +108,34 @@ contract DexRateLimitTest is Test {
         skip(10);
         vm.expectRevert("Daily trade limit reached");
         dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 1 ether);
+        
+        vm.stopPrank();
+    }
+
+    function testDailyTradeLimitAcrossOrderTypes() public {
+        vm.startPrank(trader);
+        
+        // Place 5 limit orders
+        for(uint i = 0; i < 5; i++) {
+            if (i > 0) skip(10);
+            dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 1 ether);
+        }
+
+        // Place 5 market orders
+        for(uint i = 0; i < 5; i++) {
+            skip(10);
+            dex.createMarketOrder(Dex.Side.BUY, LINK, 10);
+        }
+        
+        // 11th order (limit order) should fail
+        skip(10);
+        vm.expectRevert("Daily trade limit reached");
+        dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 1 ether);
+
+        // 11th order (market order) should also fail
+        skip(10);
+        vm.expectRevert("Daily trade limit reached");
+        dex.createMarketOrder(Dex.Side.BUY, LINK, 10);
         
         vm.stopPrank();
     }

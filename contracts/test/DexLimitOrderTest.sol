@@ -53,6 +53,9 @@ contract DexLimitOrderTest is Test {
             [uint256(0), 0, 0, 0, 0, 0, 0, 0] // proof
         );
         vm.stopPrank();
+
+        // Skip initial cooldown after registration
+        skip(10);
     }
 
     function test_BuyLimitOrderTransfersEthToReservedBalance() public {
@@ -119,10 +122,10 @@ contract DexLimitOrderTest is Test {
 
         dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 2 ether);
         // Wait for cooldown
-        skip(5 * 60);
+        skip(10);
         dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 1 ether);
         // Wait for cooldown
-        skip(5 * 60);
+        skip(10);
         dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 3 ether);
         vm.stopPrank();
 
@@ -146,10 +149,10 @@ contract DexLimitOrderTest is Test {
 
         dex.createLimitOrder(Dex.Side.SELL, LINK, 10, 2 ether);
         // Wait for cooldown
-        skip(5 * 60);
+        skip(10);
         dex.createLimitOrder(Dex.Side.SELL, LINK, 10, 1 ether);
         // Wait for cooldown
-        skip(5 * 60);
+        skip(10);
         dex.createLimitOrder(Dex.Side.SELL, LINK, 10, 3 ether);
         vm.stopPrank();
 

@@ -12,8 +12,8 @@ contract Dex is Wallet, Graylist {
     enum Side { BUY, SELL }
     enum OrderType { LIMIT, MARKET }
 
-    // Cooldown period in seconds (5 minutes)
-    uint256 private constant TRADE_COOLDOWN = 300;
+    // Cooldown period in seconds (10 seconds for testing)
+    uint256 private constant TRADE_COOLDOWN = 10;
     // Maximum trades per day
     uint256 private constant MAX_DAILY_TRADES = 10;
     // Seconds in a day

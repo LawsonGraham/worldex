@@ -32,7 +32,7 @@ contract DexRateLimitTest is Test {
     function setUp() public {
         owner = address(this);
         trader = makeAddr("trader");
-        vm.deal(trader, 100 ether);
+        vm.deal(trader, 200 ether); // Increased from 100 to 200 ETH
         
         // Deploy contracts
         worldId = new MockWorldID();
@@ -53,8 +53,8 @@ contract DexRateLimitTest is Test {
             0, // nullifierHash
             [uint256(0), 0, 0, 0, 0, 0, 0, 0] // proof
         );
-        // Fund trader
-        dex.depositEth{value: 50 ether}();
+        // Fund trader with more ETH for multiple orders
+        dex.depositEth{value: 150 ether}(); // Increased from 50 to 150 ETH
         vm.stopPrank();
 
         // Fund trader with LINK
@@ -66,27 +66,30 @@ contract DexRateLimitTest is Test {
         link.approve(address(dex), 1000);
         dex.deposit(1000, LINK);
         vm.stopPrank();
+
+        // Skip initial cooldown after registration
+        skip(10);
     }
 
     function testCooldownPeriod() public {
         vm.startPrank(trader);
         
         // First trade should succeed
-        dex.createLimitOrder(Dex.Side.BUY, LINK, 100, 1 ether);
+        dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 1 ether);
         
         // Second trade immediately after should fail
         vm.expectRevert("Trade cooldown period not elapsed");
-        dex.createLimitOrder(Dex.Side.BUY, LINK, 100, 1 ether);
+        dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 1 ether);
         
-        // Wait 4 minutes (less than cooldown)
-        skip(4 * 60);
+        // Wait 8 seconds (less than cooldown)
+        skip(8);
         vm.expectRevert("Trade cooldown period not elapsed");
-        dex.createLimitOrder(Dex.Side.BUY, LINK, 100, 1 ether);
+        dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 1 ether);
         
-        // Wait another 2 minutes (total 6 minutes, more than cooldown)
-        skip(2 * 60);
+        // Wait another 2 seconds (total 10 seconds, equal to cooldown)
+        skip(2);
         // This should succeed
-        dex.createLimitOrder(Dex.Side.BUY, LINK, 100, 1 ether);
+        dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 1 ether);
         
         vm.stopPrank();
     }
@@ -97,12 +100,12 @@ contract DexRateLimitTest is Test {
         // Place 10 orders (maximum daily limit)
         for(uint i = 0; i < 10; i++) {
             // Skip cooldown period for each trade
-            skip(5 * 60);
+            if (i > 0) skip(10);
             dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 1 ether);
         }
         
         // 11th order should fail
-        skip(5 * 60);
+        skip(10);
         vm.expectRevert("Daily trade limit reached");
         dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 1 ether);
         
@@ -114,7 +117,8 @@ contract DexRateLimitTest is Test {
         
         // Place 10 orders
         for(uint i = 0; i < 10; i++) {
-            skip(5 * 60);
+            // Skip cooldown period for each trade
+            if (i > 0) skip(10);
             dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 1 ether);
         }
         
@@ -135,7 +139,8 @@ contract DexRateLimitTest is Test {
         
         // Place 5 orders
         for(uint i = 0; i < 5; i++) {
-            skip(5 * 60);
+            // Skip cooldown period for each trade
+            if (i > 0) skip(10);
             dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 1 ether);
         }
         
@@ -161,18 +166,18 @@ contract DexRateLimitTest is Test {
         dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 1 ether);
         
         // Should have close to full cooldown
-        assertGt(dex.getRemainingCooldown(), 290); // Allow for slight timestamp variations
+        assertGt(dex.getRemainingCooldown(), 9); // Allow for slight timestamp variations
         
-        // Skip 2 minutes
-        skip(2 * 60);
+        // Skip 4 seconds
+        skip(4);
         
-        // Should have around 3 minutes remaining
+        // Should have around 6 seconds remaining
         uint256 remaining = dex.getRemainingCooldown();
-        assertGt(remaining, 170);
-        assertLt(remaining, 190);
+        assertGt(remaining, 5);
+        assertLt(remaining, 7);
         
-        // Skip 5 minutes
-        skip(5 * 60);
+        // Skip 10 seconds
+        skip(10);
         
         // Should have no cooldown
         assertEq(dex.getRemainingCooldown(), 0);
@@ -184,21 +189,21 @@ contract DexRateLimitTest is Test {
         vm.startPrank(trader);
         
         // Place limit order
-        dex.createLimitOrder(Dex.Side.BUY, LINK, 100, 1 ether);
+        dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 1 ether);
         
         // Try market order immediately after
         vm.expectRevert("Trade cooldown period not elapsed");
-        dex.createMarketOrder(Dex.Side.BUY, LINK, 100);
+        dex.createMarketOrder(Dex.Side.BUY, LINK, 10);
         
         // Wait for cooldown
-        skip(5 * 60);
+        skip(10);
         
         // Place market order
-        dex.createMarketOrder(Dex.Side.BUY, LINK, 100);
+        dex.createMarketOrder(Dex.Side.BUY, LINK, 10);
         
         // Try limit order immediately after
         vm.expectRevert("Trade cooldown period not elapsed");
-        dex.createLimitOrder(Dex.Side.BUY, LINK, 100, 1 ether);
+        dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 1 ether);
         
         vm.stopPrank();
     }

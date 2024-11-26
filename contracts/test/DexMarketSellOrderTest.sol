@@ -48,10 +48,10 @@ contract DexMarketSellOrderTest is Test {
         link.transfer(user1, 1000); // Give user1 some LINK tokens
         vm.stopPrank();
 
-        // Verify users
+        // Verify users with correct signal parameter
         vm.startPrank(user1);
         dex.registerUser(
-            user1,
+            user1, // signal parameter should be the user's address
             0, // root
             0, // nullifierHash
             [uint256(0), 0, 0, 0, 0, 0, 0, 0] // proof
@@ -60,12 +60,15 @@ contract DexMarketSellOrderTest is Test {
 
         vm.startPrank(user2);
         dex.registerUser(
-            user2,
+            user2, // signal parameter should be the user's address
             1, // root
             1, // nullifierHash
             [uint256(0), 0, 0, 0, 0, 0, 0, 0] // proof
         );
         vm.stopPrank();
+
+        // Skip initial cooldown after registration
+        skip(10);
     }
 
     function test_CreateSellMarketOrderWithEmptyOrderbook() public {
@@ -95,6 +98,9 @@ contract DexMarketSellOrderTest is Test {
         dex.createLimitOrder(Dex.Side.BUY, LINK, 50, 1 ether);
         vm.stopPrank();
 
+        // Wait for cooldown
+        skip(10);
+
         // Create market sell order
         vm.startPrank(user1);
         link.approve(address(dex), 50);
@@ -112,6 +118,9 @@ contract DexMarketSellOrderTest is Test {
         dex.depositEth{value: 50 ether}();
         dex.createLimitOrder(Dex.Side.BUY, LINK, 50, 1 ether);
         vm.stopPrank();
+
+        // Wait for cooldown
+        skip(10);
 
         // Create market sell order
         vm.startPrank(user1);
@@ -132,6 +141,9 @@ contract DexMarketSellOrderTest is Test {
         dex.createLimitOrder(Dex.Side.BUY, LINK, 50, 1 ether);
         vm.stopPrank();
 
+        // Wait for cooldown
+        skip(10);
+
         // Create market sell order that fills the entire buy order
         vm.startPrank(user1);
         link.approve(address(dex), 50);
@@ -149,6 +161,9 @@ contract DexMarketSellOrderTest is Test {
         dex.depositEth{value: 50 ether}();
         dex.createLimitOrder(Dex.Side.BUY, LINK, 50, 1 ether);
         vm.stopPrank();
+
+        // Wait for cooldown
+        skip(10);
 
         // Create market sell order for more than available
         vm.startPrank(user1);

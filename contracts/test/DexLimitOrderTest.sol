@@ -47,7 +47,7 @@ contract DexLimitOrderTest is Test {
         // Verify user1
         vm.startPrank(user1);
         dex.registerUser(
-            user1,
+            user1, // signal parameter should be the user's address
             0, // root
             0, // nullifierHash
             [uint256(0), 0, 0, 0, 0, 0, 0, 0] // proof
@@ -118,7 +118,11 @@ contract DexLimitOrderTest is Test {
         dex.depositEth{value: 60 ether}(); // Deposit enough for all orders
 
         dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 2 ether);
+        // Wait for cooldown
+        skip(5 * 60);
         dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 1 ether);
+        // Wait for cooldown
+        skip(5 * 60);
         dex.createLimitOrder(Dex.Side.BUY, LINK, 10, 3 ether);
         vm.stopPrank();
 
@@ -141,7 +145,11 @@ contract DexLimitOrderTest is Test {
         dex.deposit(100, LINK);
 
         dex.createLimitOrder(Dex.Side.SELL, LINK, 10, 2 ether);
+        // Wait for cooldown
+        skip(5 * 60);
         dex.createLimitOrder(Dex.Side.SELL, LINK, 10, 1 ether);
+        // Wait for cooldown
+        skip(5 * 60);
         dex.createLimitOrder(Dex.Side.SELL, LINK, 10, 3 ether);
         vm.stopPrank();
 

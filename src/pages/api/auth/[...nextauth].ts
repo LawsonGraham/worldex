@@ -28,10 +28,35 @@ export const authOptions: NextAuthOptions = {
       token.userRole = 'admin';
       return token;
     },
+    async redirect({ url, baseUrl }) {
+      // Allow callbacks to production domain and localhost 3000
+      const allowedHosts = [
+        'localhost:3000',
+        'worldexo.vercel.app'
+      ];
+      
+      // Check if the URL is relative or matches allowed hosts
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
+      if (allowedHosts.some(host => url.includes(host))) return url;
+      return baseUrl;
+    },
   },
-  // Configure URLs for Vercel deployment
   pages: {
     signIn: '/login',
+    error: '/login',
+  },
+  // Production domain configuration
+  cookies: {
+    sessionToken: {
+      name: `${process.env.NODE_ENV === 'production' ? '__Secure-' : ''}next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        domain: process.env.NODE_ENV === 'production' ? '.worldexo.vercel.app' : undefined
+      }
+    }
   },
   debug: process.env.NODE_ENV === 'development',
 };

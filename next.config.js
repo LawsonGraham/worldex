@@ -2,19 +2,26 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  // Configure domains for next/image if needed
   images: {
-    domains: ['worldcoin.org', 'id.worldcoin.org'],
+    domains: ['worldcoin.org', 'id.worldcoin.org', 'worldexo.vercel.app'],
   },
-  // Environment variables that should be available at build time
   env: {
-    NEXT_PUBLIC_APP_ID: process.env.NEXT_PUBLIC_APP_ID,
-    NEXT_PUBLIC_ACTION: process.env.NEXT_PUBLIC_ACTION,
-    NEXT_PUBLIC_WALLETCONNECT_ID: process.env.NEXT_PUBLIC_WALLETCONNECT_ID,
-    NEXT_PUBLIC_CONTRACT_ADDRESS: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-    NEXT_PUBLIC_ALCHEMY_RPC_URL: process.env.NEXT_PUBLIC_ALCHEMY_RPC_URL,
+    NEXT_PUBLIC_APP_ID: process.env.NEXT_PUBLIC_APP_ID || 'app_2a124e9650db276b1a861f7ab9891763',
+    NEXT_PUBLIC_ACTION: process.env.NEXT_PUBLIC_ACTION || 'test-action',
+    NEXT_PUBLIC_WALLETCONNECT_ID: process.env.NEXT_PUBLIC_WALLETCONNECT_ID || '67230c935989bb6922b0ee8f53bf9441',
+    NEXT_PUBLIC_CONTRACT_ADDRESS: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
+    NEXT_PUBLIC_ALCHEMY_RPC_URL: process.env.NEXT_PUBLIC_ALCHEMY_RPC_URL || 'https://worldchain-sepolia.g.alchemy.com/v2/dHgmedS39psbe_tuXLRsdUSupfWi85Rj',
   },
-  // Configure headers for security
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        fs: false,
+        net: false,
+        tls: false,
+      }
+    }
+    return config
+  },
   async headers() {
     return [
       {
@@ -39,6 +46,13 @@ const nextConfig = {
         ],
       },
     ]
+  },
+  // Vercel specific configuration
+  serverRuntimeConfig: {
+    PROJECT_ROOT: __dirname,
+  },
+  publicRuntimeConfig: {
+    VERCEL_URL: process.env.VERCEL_URL || 'worldexo.vercel.app',
   },
 }
 

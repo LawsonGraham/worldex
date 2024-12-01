@@ -1,6 +1,7 @@
 import { signIn } from "next-auth/react"
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import { Button } from "@/components/ui/button"
 
 export default function Login() {
   const router = useRouter()
@@ -24,33 +25,34 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <div className="max-w-md w-full space-y-8 p-8 bg-gray-800 rounded-lg shadow-lg">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold text-white">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="card max-w-md w-full space-y-8">
+        <div className="card-header text-center">
+          <h2 className="text-3xl font-bold tracking-tight">
             Welcome to WorldEx
           </h2>
-          <p className="mt-2 text-sm text-gray-400">
+          <p className="text-sm text-muted-foreground mt-2">
             Sign in with World ID to continue
           </p>
         </div>
 
-        {error && (
-          <div className="bg-red-900/50 border border-red-500 rounded-md p-4 mt-4">
-            <p className="text-sm text-red-400">
-              Error: {error}
-            </p>
-          </div>
-        )}
+        <div className="card-content space-y-6">
+          {error && (
+            <div className="bg-destructive/10 border border-destructive rounded-md p-4">
+              <p className="text-sm text-destructive">
+                Error: {error}
+              </p>
+            </div>
+          )}
 
-        <div className="mt-8">
-          <button
+          <Button
             onClick={handleSignIn}
-            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="w-full"
+            size="lg"
           >
-            <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+            <span className="mr-2">
               <svg
-                className="h-5 w-5 text-blue-500 group-hover:text-blue-400"
+                className="h-5 w-5"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
                 fill="currentColor"
@@ -64,24 +66,20 @@ export default function Login() {
               </svg>
             </span>
             Sign in with World ID
-          </button>
-        </div>
+          </Button>
 
-        <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-700"></div>
+              <div className="w-full border-t"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-gray-800 text-gray-400">
+              <span className="px-2 bg-card text-muted-foreground">
                 Secure authentication powered by World ID
               </span>
             </div>
           </div>
-        </div>
 
-        <div className="mt-4 text-center">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground text-center">
             Make sure you have the World App installed and are verified
           </p>
         </div>

@@ -1,28 +1,40 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install --legacy-peer-deps",
   "env": {
-    "NEXTAUTH_SECRET": "@nextauth_secret",
-    "WLD_CLIENT_ID": "@wld_client_id",
-    "WLD_CLIENT_SECRET": "@wld_client_secret",
-    "NEXT_PUBLIC_APP_ID": "@next_public_app_id",
-    "NEXT_PUBLIC_ACTION": "@next_public_action",
-    "NEXT_PUBLIC_WALLETCONNECT_ID": "@next_public_walletconnect_id",
-    "NEXT_PUBLIC_CONTRACT_ADDRESS": "@next_public_contract_address",
-    "NEXT_PUBLIC_ALCHEMY_RPC_URL": "@next_public_alchemy_rpc_url"
+    "NEXTAUTH_URL": "https://worldexo.vercel.app",
+    "NEXTAUTH_SECRET": "0fjDAH3SRQM+jzbdAT2uLp4K7DxGUD8unbtopbSTvmw=",
+    "WLD_CLIENT_ID": "app_2a124e9650db276b1a861f7ab9891763",
+    "WLD_CLIENT_SECRET": "sk_8a1fb67ed99ec6195d9b42713dc3953e99764cb65b48c45f",
+    "NEXT_PUBLIC_APP_ID": "app_2a124e9650db276b1a861f7ab9891763",
+    "NEXT_PUBLIC_ACTION": "test-action",
+    "NEXT_PUBLIC_WALLETCONNECT_ID": "67230c935989bb6922b0ee8f53bf9441",
+    "NEXT_PUBLIC_CONTRACT_ADDRESS": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "NEXT_PUBLIC_ALCHEMY_RPC_URL": "https://worldchain-sepolia.g.alchemy.com/v2/dHgmedS39psbe_tuXLRsdUSupfWi85Rj"
   },
-  "build": {
-    "env": {
-      "NEXT_PUBLIC_APP_ID": "@next_public_app_id",
-      "NEXT_PUBLIC_ACTION": "@next_public_action",
-      "NEXT_PUBLIC_WALLETCONNECT_ID": "@next_public_walletconnect_id",
-      "NEXT_PUBLIC_CONTRACT_ADDRESS": "@next_public_contract_address",
-      "NEXT_PUBLIC_ALCHEMY_RPC_URL": "@next_public_alchemy_rpc_url"
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "origin-when-cross-origin"
+        }
+      ]
     }
-  }
+  ]
 }

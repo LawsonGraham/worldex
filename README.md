@@ -2,6 +2,25 @@
 
 A decentralized exchange with World ID authentication.
 
+## Local Development - Given Vercel is down, local lets you play with UI, but with no auth (auth requires callbacks to Vercel)
+
+1. Install dependencies:
+```bash
+pnpm install
+```
+
+2. Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+
+3. Run development server:
+```bash
+pnpm run dev
+```
+
+4. Visit `http://localhost:3000/login`
+
 ## Production Environment - Vercel currently down
 
 - Production URL: https://worldchain-one.vercel.app
@@ -37,25 +56,6 @@ NEXT_PUBLIC_ALCHEMY_RPC_URL=https://worldchain-sepolia.g.alchemy.com/v2/dHgmedS3
    ```
    https://worldchain-one.vercel.app/api/auth/callback/worldcoin
    ```
-
-## Local Development - Given Vercel is down, local lets you play with UI, but with no auth (auth requires callbacks to Vercel)
-
-1. Install dependencies:
-```bash
-pnpm install
-```
-
-2. Copy `.env.example` to `.env`:
-```bash
-cp .env.example .env
-```
-
-3. Run development server:
-```bash
-pnpm run dev
-```
-
-4. Visit `http://localhost:3000/login`
 
 ## Deployment Verification
 

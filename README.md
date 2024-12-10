@@ -55,6 +55,8 @@ cp .env.example .env
 pnpm run dev
 ```
 
+4. Visit `http://localhost:3000/login`
+
 ## Deployment Verification
 
 After deploying to Vercel, verify the following:

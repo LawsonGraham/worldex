@@ -15,7 +15,7 @@ contract Dex is Wallet, Graylist {
     // Cooldown period in seconds (10 seconds for testing)
     uint256 private constant TRADE_COOLDOWN = 10;
     // Maximum trades per day
-    uint256 private constant MAX_DAILY_TRADES = 25;
+    uint256 private constant MAX_DAILY_TRADES = 10;
     // Seconds in a day
     uint256 private constant SECONDS_PER_DAY = 86400;
 

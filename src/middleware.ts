@@ -18,6 +18,8 @@ export default withAuth(
   {
     callbacks: {
       authorized({ req, token }) {
+        // bypass as vercel is down so we can't authenticate via world id
+        return true
         // Protect all routes except public ones
         const publicPaths = ['/login', '/api/auth']
         const isPublicPath = publicPaths.some(path => 

@@ -15,9 +15,11 @@ export default function Login() {
 
   const handleSignIn = async () => {
     try {
-      await signIn("worldcoin", { 
-        callbackUrl: "/",
-      })
+      // bypassed given vercel is down
+      router.push('/')
+      // await signIn("worldcoin", { 
+      //   callbackUrl: "/",
+      // })
     } catch (error) {
       console.error('Sign in error:', error)
       setError(error instanceof Error ? error.message : 'Failed to sign in')
@@ -29,7 +31,7 @@ export default function Login() {
       <div className="card max-w-md w-full space-y-8">
         <div className="card-header text-center">
           <h2 className="text-3xl font-bold tracking-tight">
-            Welcome to WorldEx
+            Welcome to WorlDEX
           </h2>
           <p className="text-sm text-muted-foreground mt-2">
             Sign in with World ID to continue

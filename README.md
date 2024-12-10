@@ -1,8 +1,8 @@
-# WorldEx
+# WorlDEX
 
 A decentralized exchange with World ID authentication.
 
-## Production Environment
+## Production Environment - Vercel currently down
 
 - Production URL: https://worldchain-one.vercel.app
 - World ID Callback URL: https://worldchain-one.vercel.app/api/auth/callback/worldcoin
@@ -38,7 +38,7 @@ NEXT_PUBLIC_ALCHEMY_RPC_URL=https://worldchain-sepolia.g.alchemy.com/v2/dHgmedS3
    https://worldchain-one.vercel.app/api/auth/callback/worldcoin
    ```
 
-## Local Development
+## Local Development - Given Vercel is down, local lets you play with UI, but with no auth (auth requires callbacks to Vercel)
 
 1. Install dependencies:
 ```bash

@@ -20,9 +20,11 @@ export default function Home() {
 
   // Authentication check
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login')
-    }
+    // bypassed given vercel is down
+    // if (status === 'unauthenticated') {
+    //   router.push('/login')
+    // }
+    router.push('/')
   }, [status, router])
 
   const renderOperationButton = (
@@ -66,7 +68,7 @@ export default function Home() {
       <div className="container">
         {/* Header */}
         <div className="flex justify-between items-center mb-12">
-          <h1 className="text-3xl font-bold">WorldEx</h1>
+          <h1 className="text-3xl font-bold">WorlDEX</h1>
           <div className="flex items-center space-x-4">
             <ConnectKitButton />
             {session && (
@@ -85,7 +87,7 @@ export default function Home() {
 
         {!account.isConnected && (
           <div className="text-center py-12">
-            <h2 className="text-2xl font-semibold mb-4">Welcome to WorldEx</h2>
+            <h2 className="text-2xl font-semibold mb-4">Welcome to WorlDEX</h2>
             <p className="text-gray-400 mb-8">
               Connect your wallet to start trading
             </p>

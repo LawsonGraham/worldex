@@ -44,7 +44,7 @@ export const config = createConfig(
     walletConnectProjectId: walletConnectProjectId,
 
     // Required
-    appName: "WorldEx",
+    appName: "WorlDEX",
 
     // Optional
     appDescription: "Decentralized Exchange with World ID Authentication",
